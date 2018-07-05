@@ -1,0 +1,14 @@
+language: php
+php:
+  - 5.5
+
+before_script:
+  - composer selfupdate --no-progress
+  - composer create-project drupal/drupal-project-legacy drupal-legacy-project 8.6.x-dev
+  - git clone https://git.drupal.org/project/drupal.git -b 8.6.x drupal-git-clone
+  - composer install --working-dir drupal-git-clone
+  - rm -rf drupal-git-clone/.git
+  - rm -rf drupal-*/composer.????
+
+script:
+  - diff -rq drupal-git-clone drupal-legacy-project
