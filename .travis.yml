@@ -10,6 +10,7 @@ before_script:
   - composer install --working-dir drupal-git-clone
   - rm -rf drupal-git-clone/.git
   - rm -rf drupal-*/composer.????
+  - rm -rf drupal-legacy-project/.travis.yml
 
 script:
   - diff -rq drupal-git-clone drupal-legacy-project
