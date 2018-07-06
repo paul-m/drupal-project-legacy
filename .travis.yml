@@ -4,6 +4,7 @@ php:
 
 before_script:
   - composer selfupdate --no-progress
+  - composer clearcache
   - composer create-project drupal/drupal-project-legacy drupal-legacy-project 8.6.x-dev
   - git clone https://git.drupal.org/project/drupal.git -b 8.6.x drupal-git-clone
   - composer install --working-dir drupal-git-clone
