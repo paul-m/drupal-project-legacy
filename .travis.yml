@@ -5,9 +5,9 @@ php:
 before_script:
   - composer selfupdate --no-progress
   - composer clearcache
-  - composer create-project --no-dev drupal/drupal-project-legacy drupal-legacy-project 8.6.x-dev
+  - composer create-project --no-dev --no-progress drupal/drupal-project-legacy drupal-legacy-project 8.6.x-dev
   - git clone https://git.drupal.org/project/drupal.git -b 8.6.x drupal-git-clone
-  - composer install --no-dev --working-dir drupal-git-clone
+  - composer install --no-dev --no-progress --working-dir drupal-git-clone
   - cd drupal-git-clone
   - composer show --name-only > composer_installed.txt
   - rm -rf vendor
