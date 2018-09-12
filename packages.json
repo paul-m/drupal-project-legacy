@@ -1,0 +1,11 @@
+{
+  "package": {
+    "name": "drupal/drupal-project-legacy",
+    "version": "8.6.0",
+    "source": {
+      "url": "TRAVIS_BUILD_DIR/.git",
+      "type": "git",
+      "reference": "DRUPAL_PROJECT_LEGACY_BRANCH"
+    }
+  }
+}
