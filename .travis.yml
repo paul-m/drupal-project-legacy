@@ -46,4 +46,3 @@ before_script:
 
 script:
   - diff -rq drupal-git-clone drupal-project-legacy
-  - diff -r clone_composer_installed.txt project_composer_installed.txt
