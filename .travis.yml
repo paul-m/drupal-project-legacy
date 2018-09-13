@@ -30,16 +30,25 @@ before_script:
   # TODO: Change these as we go along.
   # drupal-project-legacy will not be a git repo.
   - rm -rf drupal-git-clone/.git
+  # drupal-project-legacy does not yet add .htaccess or web.config files.
+  - rm -rf drupal-git-clone/.htaccess
+  - rm -rf drupal-git-clone/web.config
   # Remove files unique to drupal-legacy-project
   - rm -rf drupal-project-legacy/.travis.yml
   - rm -rf drupal-project-legacy/LICENSE
   - rm -rf drupal-project-legacy/packages.json
   - rm -rf drupal-project-legacy/README.md
+  - rm -rf drupal-project-legacy/src
+  # Different projects have different composer.json and thus lock files.
+  - rm -rf drupal-git-clone/composer.json
+  - rm -rf drupal-git-clone/composer.lock
+  - rm -rf drupal-project-legacy/composer.json
+  - rm -rf drupal-project-legacy/composer.lock
   # Autoloading and composer vendor dirs will differ because of file paths.
   - rm -rf drupal-git-clone/vendor/autoload.php
+  - rm -rf drupal-git-clone/vendor/composer
   - rm -rf drupal-project-legacy/vendor/autoload.php
   - rm -rf drupal-project-legacy/vendor/composer
-  - rm -rf drupal-git-clone/vendor/composer
   # Clone will not contain any drupal/* dependencies.
   - rm -rf drupal-project-legacy/vendor/drupal/
 
