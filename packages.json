@@ -3,7 +3,7 @@
     "name": "drupal/drupal-project-legacy",
     "version": "8.6.0",
     "source": {
-      "url": "./.git",
+      "url": "/Users/paulmitchum/drupal-project-legacy/.git",
       "type": "git",
       "reference": "passing"
     }
