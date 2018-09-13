@@ -12,9 +12,9 @@ class Composer {
     $packages = $locker->getLockData()['packages'];
     foreach ($packages as $package) {
       $name = $package['name'];
-      error_log('removing: ' . $name);
-
-
+      if (DrupalComposer::findPackageKey($name)) {
+        error_log('removing: ' . $name);
+      }
     }
 
 
