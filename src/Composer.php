@@ -11,14 +11,14 @@ class Composer {
     $root_package = $e->getComposer()->getPackage();
 
     $path = $e->getComposer()->getInstallationManager()->getInstallPath($root_package);
-    $vendor_path = substr($path, 0, -1 - strlen($root_package->getName()));
+    $vendor_dir = substr($path, 0, -1 - strlen($root_package->getName()));
 
     $locker = $e->getComposer()->getLocker();
     $packages = $locker->getLockData()['packages'];
     foreach ($packages as $package) {
       $name = $package['name'];
       if ($package_key = static::findPackageKey($name)) {
-        $message = sprintf("    Processing <comment>%s</comment>", $package->getPrettyName());
+        $message = sprintf("    Processing <comment>%s</comment>", $name);
         if ($io->isVeryVerbose()) {
           $io->write($message);
         }
@@ -35,7 +35,7 @@ class Composer {
                 // gone wrong. Therefore the message has to include the package name
                 // as the first informational message might not exist.
                 $print_message = TRUE;
-                $message = sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $path, $package->getPrettyName());
+                $message = sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $path, $name);
               }
             }
             else {
