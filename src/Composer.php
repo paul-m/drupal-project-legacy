@@ -7,12 +7,52 @@ use Composer\Script\Event;
 class Composer {
 
   public static function projectFinished(Event $e) {
+    $io = $e->getIO();
+    $root_package = $e->getComposer()->getPackage();
+
+    $path = $e->getComposer()->getInstallationManager()->getInstallPath($root_package);
+    $vendor_path = substr($path, 0, -1 - strlen($root_package->getName()));
+
     $locker = $e->getComposer()->getLocker();
     $packages = $locker->getLockData()['packages'];
     foreach ($packages as $package) {
       $name = $package['name'];
-      if (static::findPackageKey($name)) {
-        error_log('removing: ' . $name);
+      if ($package_key = static::findPackageKey($name)) {
+        $message = sprintf("    Processing <comment>%s</comment>", $package->getPrettyName());
+        if ($io->isVeryVerbose()) {
+          $io->write($message);
+        }
+        if ($package_key) {
+          foreach (static::$packageToCleanup[$package_key] as $path) {
+            $dir_to_remove = $vendor_dir . '/' . $package_key . '/' . $path;
+            $print_message = $io->isVeryVerbose();
+            if (is_dir($dir_to_remove)) {
+              if (static::deleteRecursive($dir_to_remove)) {
+                $message = sprintf("      <info>Removing directory '%s'</info>", $path);
+              }
+              else {
+                // Always display a message if this fails as it means something has
+                // gone wrong. Therefore the message has to include the package name
+                // as the first informational message might not exist.
+                $print_message = TRUE;
+                $message = sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $path, $package->getPrettyName());
+              }
+            }
+            else {
+              // If the package has changed or the --prefer-dist version does not
+              // include the directory this is not an error.
+              $message = sprintf("      Directory '%s' does not exist", $path);
+            }
+            if ($print_message) {
+              $io->write($message);
+            }
+          }
+
+          if ($io->isVeryVerbose()) {
+            // Add a new line to separate this output from the next package.
+            $io->write("");
+          }
+        }
       }
     }
 
