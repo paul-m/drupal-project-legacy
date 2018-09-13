@@ -37,12 +37,6 @@ before_script:
   - rm -rf drupal-project-legacy/vendor/drupal/core
   - rm -rf drupal-project-legacy/vendor/drupal/drupal-core-strict
   - rm -rf drupal-project-legacy/vendor/drupal/drupal-scaffold
-  # We know that drupal-project-legacy will install packages that aren't in the
-  # repo (yet).
-  # TODO: Change these as we go along.
-  - sed -i '/drupal\/core/d' ./drupal-project-legacy/composer_installed.txt
-  - sed -i '/drupal\/drupal-core-strict/d' ./drupal-project-legacy/composer_installed.txt
-  - sed -i '/drupal\/drupal-scaffold/d' ./drupal-project-legacy/composer_installed.txt
 
 script:
   - diff -rq drupal-git-clone drupal-project-legacy
