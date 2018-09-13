@@ -1,6 +1,6 @@
 <?php
 
-namespace DrupalLegacyProject\Composer;
+namespace DrupalLegacyProject;
 
 use DrupalLegacyProject\FileStorage;
 use Composer\Script\Event;

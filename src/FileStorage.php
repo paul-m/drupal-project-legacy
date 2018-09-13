@@ -1,6 +1,6 @@
 <?php
 
-namespace DrupalLegacyProject\PhpStorage;
+namespace DrupalLegacyProject;
 
 /**
  * Stores the code as regular PHP files.

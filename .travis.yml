@@ -15,6 +15,7 @@ before_script:
   - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$DRUPAL_PROJECT_LEGACY_BRANCH"'@' packages.json
   - cat packages.json
   # Set up Composer.
+  - composer selfupdate --no-interaction
   - composer clearcache
   # Build our parallel codebases.
   - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
