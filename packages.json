@@ -3,9 +3,9 @@
     "name": "drupal/drupal-project-legacy",
     "version": "8.6.0",
     "source": {
-      "url": "/Users/paulmitchum/drupal-project-legacy/.git",
+      "url": "TRAVIS_BUILD_DIR/.git",
       "type": "git",
-      "reference": "passing"
+      "reference": "DRUPAL_PROJECT_LEGACY_BRANCH"
     }
   }
 }

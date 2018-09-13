@@ -22,11 +22,9 @@ before_script:
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
   # Make lists of composer packages installed, remove vendor dirs.
   - cd drupal-git-clone
-  - composer show --name-only | sort > composer_installed.txt
-  - rm -rf vendor
+  - composer show --name-only | sort > ../clone_composer_installed.txt
   - cd ../drupal-project-legacy
-  - composer show --name-only | sort > composer_installed.txt
-  - rm -rf vendor
+  - composer show --name-only | sort > ../project_composer_installed.txt
   # Remove files that we know will be different.
   # TODO: Change these as we go along.
   - cd ..
@@ -36,6 +34,9 @@ before_script:
   - rm -rf drupal-project-legacy/LICENSE
   - rm -rf drupal-project-legacy/packages.json
   - rm -rf drupal-project-legacy/README.md
+  - rm -rf drupal-project-legacy/vendor/drupal/core
+  - rm -rf drupal-project-legacy/vendor/drupal/drupal-core-strict
+  - rm -rf drupal-project-legacy/vendor/drupal/drupal-scaffold
   # We know that drupal-project-legacy will install packages that aren't in the
   # repo (yet).
   # TODO: Change these as we go along.
@@ -45,3 +46,4 @@ before_script:
 
 script:
   - diff -r drupal-git-clone drupal-project-legacy
+  - diff -r clone_composer_installed.txt project_composer_installed.txt
