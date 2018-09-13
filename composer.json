@@ -1,4 +1,8 @@
 {
+    "_readme": {
+        "note": "THIS IS A DEVELOPMENT VERSION OF THIS PROJECT.",
+        "TODO": "Remove the autoload section. Refactor the composer scripts away.",
+    },
     "name": "drupal/drupal-project-legacy",
     "description": "Project template for Drupal 8",
     "type": "project",
@@ -21,8 +25,13 @@
         "preferred-install": "dist",
         "sort-packages": true
     },
+    "autoload": {
+        "psr-4": {
+            "DrupalLegacyProject\\Core\\": "src/"
+        }
+    },
     "scripts": {
-        "post-package-install": "Drupal\\Core\\Composer\\Composer::vendorTestCodeCleanup",
-        "post-package-update": "Drupal\\Core\\Composer\\Composer::vendorTestCodeCleanup"
+        "post-package-install": "DrupalLegacyProject\\Core\\Composer\\Composer::vendorTestCodeCleanup",
+        "post-package-update": "DrupalLegacyProject\\Core\\Composer\\Composer::vendorTestCodeCleanup"
     }
 }
