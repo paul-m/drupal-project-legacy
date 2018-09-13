@@ -20,7 +20,7 @@ before_script:
   - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
   - git clone https://git.drupal.org/project/drupal.git -b $DRUPAL_CORE_VERSION drupal-git-clone
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
-  # Make lists of composer packages installed, remove vendor dirs.
+  # Make lists of composer packages installed.
   - cd drupal-git-clone
   - composer show --name-only
   - cd ../drupal-project-legacy
@@ -49,7 +49,7 @@ before_script:
   - rm -rf drupal-git-clone/vendor/composer
   - rm -rf drupal-project-legacy/vendor/autoload.php
   - rm -rf drupal-project-legacy/vendor/composer
-  # Clone will not contain any drupal/* dependencies.
+  # drupal-git-clone will not contain any drupal/* dependencies.
   - rm -rf drupal-project-legacy/vendor/drupal/
 
 script:

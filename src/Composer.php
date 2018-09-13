@@ -1,71 +1,22 @@
 <?php
 
-namespace DrupalLegacyProject;
+namespace DrupalLegacyProject\Composer;
 
+use DrupalLegacyProject\FileStorage;
 use Composer\Script\Event;
+use Composer\Installer\PackageEvent;
+use Composer\Semver\Constraint\Constraint;
+use Composer\Util\ProcessExecutor;
 
+/**
+ * Provides static functions for composer script events.
+ *
+ * This is a copy of Drupal\Core\Composer\Composer.
+ *
+ * @see \Drupal\Core\Composer\Composer
+ * @see https://getcomposer.org/doc/articles/scripts.md
+ */
 class Composer {
-
-  public static function projectFinished(Event $e) {
-    $io = $e->getIO();
-    $root_package = $e->getComposer()->getPackage();
-
-    $path = $e->getComposer()->getInstallationManager()->getInstallPath($root_package);
-    $vendor_dir = substr($path, 0, -1 - strlen($root_package->getName()));
-
-    $locker = $e->getComposer()->getLocker();
-    $packages = $locker->getLockData()['packages'];
-    foreach ($packages as $package) {
-      $name = $package['name'];
-      if ($package_key = static::findPackageKey($name)) {
-        $message = sprintf("    Processing <comment>%s</comment>", $name);
-        if ($io->isVeryVerbose()) {
-          $io->write($message);
-        }
-        if ($package_key) {
-          foreach (static::$packageToCleanup[$package_key] as $path) {
-            $dir_to_remove = $vendor_dir . '/' . $package_key . '/' . $path;
-            $print_message = $io->isVeryVerbose();
-            if (is_dir($dir_to_remove)) {
-              if (static::deleteRecursive($dir_to_remove)) {
-                $message = sprintf("      <info>Removing directory '%s'</info>", $path);
-              }
-              else {
-                // Always display a message if this fails as it means something has
-                // gone wrong. Therefore the message has to include the package name
-                // as the first informational message might not exist.
-                $print_message = TRUE;
-                $message = sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $path, $name);
-              }
-            }
-            else {
-              // If the package has changed or the --prefer-dist version does not
-              // include the directory this is not an error.
-              $message = sprintf("      Directory '%s' does not exist", $path);
-            }
-            if ($print_message) {
-              $io->write($message);
-            }
-          }
-
-          if ($io->isVeryVerbose()) {
-            // Add a new line to separate this output from the next package.
-            $io->write("");
-          }
-        }
-      }
-    }
-
-
-//    \error_log($e->getName());
-//    \error_log(print_r($e->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages(),true));
-    /*
-    $packages = $e->getComposer()->getPackage()->getRepository()->getPackages();
-    foreach ($packages as $package) {
-      \error_log($package->getName());
-    }
-    */
-  }
 
   protected static $packageToCleanup = [
     'behat/mink' => ['tests', 'driver-testsuite'],
@@ -122,6 +73,178 @@ class Composer {
   ];
 
   /**
+   * Add vendor classes to Composer's static classmap.
+   */
+  public static function preAutoloadDump(Event $event) {
+    // Get the configured vendor directory.
+    $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
+
+    // We need the root package so we can add our classmaps to its loader.
+    $package = $event->getComposer()->getPackage();
+    // We need the local repository so that we can query and see if it's likely
+    // that our files are present there.
+    $repository = $event->getComposer()->getRepositoryManager()->getLocalRepository();
+    // This is, essentially, a null constraint. We only care whether the package
+    // is present in the vendor directory yet, but findPackage() requires it.
+    $constraint = new Constraint('>', '');
+    // It's possible that there is no classmap specified in a custom project
+    // composer.json file. We need one so we can optimize lookup for some of our
+    // dependencies.
+    $autoload = $package->getAutoload();
+    if (!isset($autoload['classmap'])) {
+      $autoload['classmap'] = [];
+    }
+    // Check for our packages, and then optimize them if they're present.
+    if ($repository->findPackage('symfony/http-foundation', $constraint)) {
+      $autoload['classmap'] = array_merge($autoload['classmap'], [
+        $vendor_dir . '/symfony/http-foundation/Request.php',
+        $vendor_dir . '/symfony/http-foundation/ParameterBag.php',
+        $vendor_dir . '/symfony/http-foundation/FileBag.php',
+        $vendor_dir . '/symfony/http-foundation/ServerBag.php',
+        $vendor_dir . '/symfony/http-foundation/HeaderBag.php',
+      ]);
+    }
+    if ($repository->findPackage('symfony/http-kernel', $constraint)) {
+      $autoload['classmap'] = array_merge($autoload['classmap'], [
+        $vendor_dir . '/symfony/http-kernel/HttpKernel.php',
+        $vendor_dir . '/symfony/http-kernel/HttpKernelInterface.php',
+        $vendor_dir . '/symfony/http-kernel/TerminableInterface.php',
+      ]);
+    }
+    $package->setAutoload($autoload);
+  }
+
+  /**
+   * Ensures that .htaccess and web.config files are present in Composer root.
+   *
+   * @param \Composer\Script\Event $event
+   */
+  public static function ensureHtaccess(Event $event) {
+
+    // The current working directory for composer scripts is where you run
+    // composer from.
+    $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
+
+    // Prevent access to vendor directory on Apache servers.
+    $htaccess_file = $vendor_dir . '/.htaccess';
+    if (!file_exists($htaccess_file)) {
+      file_put_contents($htaccess_file, FileStorage::htaccessLines(TRUE) . "\n");
+    }
+
+    // Prevent access to vendor directory on IIS servers.
+    $webconfig_file = $vendor_dir . '/web.config';
+    if (!file_exists($webconfig_file)) {
+      $lines = <<<EOT
+<configuration>
+  <system.webServer>
+    <authorization>
+      <deny users="*">
+    </authorization>
+  </system.webServer>
+</configuration>
+EOT;
+      file_put_contents($webconfig_file, $lines . "\n");
+    }
+  }
+
+  /**
+   * Fires the drupal-phpunit-upgrade script event if necessary.
+   *
+   * @param \Composer\Script\Event $event
+   */
+  public static function upgradePHPUnit(Event $event) {
+    $repository = $event->getComposer()->getRepositoryManager()->getLocalRepository();
+    // This is, essentially, a null constraint. We only care whether the package
+    // is present in the vendor directory yet, but findPackage() requires it.
+    $constraint = new Constraint('>', '');
+    $phpunit_package = $repository->findPackage('phpunit/phpunit', $constraint);
+    if (!$phpunit_package) {
+      // There is nothing to do. The user is probably installing using the
+      // --no-dev flag.
+      return;
+    }
+
+    // If the PHP version is 7.0 or above and PHPUnit is less than version 6
+    // call the drupal-phpunit-upgrade script to upgrade PHPUnit.
+    if (!static::upgradePHPUnitCheck($phpunit_package->getVersion())) {
+      $event->getComposer()
+        ->getEventDispatcher()
+        ->dispatchScript('drupal-phpunit-upgrade');
+    }
+  }
+
+  /**
+   * Determines if PHPUnit needs to be upgraded.
+   *
+   * This method is located in this file because it is possible that it is
+   * called before the autoloader is available.
+   *
+   * @param string $phpunit_version
+   *   The PHPUnit version string.
+   *
+   * @return bool
+   *   TRUE if the PHPUnit needs to be upgraded, FALSE if not.
+   */
+  public static function upgradePHPUnitCheck($phpunit_version) {
+    return !(version_compare(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, '7.0') >= 0 && version_compare($phpunit_version, '6.1') < 0);
+  }
+
+  /**
+   * Remove possibly problematic test files from vendored projects.
+   *
+   * @param \Composer\Installer\PackageEvent $event
+   *   A PackageEvent object to get the configured composer vendor directories
+   *   from.
+   */
+  public static function vendorTestCodeCleanup(PackageEvent $event) {
+    $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
+    $io = $event->getIO();
+    $op = $event->getOperation();
+    if ($op->getJobType() == 'update') {
+      $package = $op->getTargetPackage();
+    }
+    else {
+      $package = $op->getPackage();
+    }
+    $package_key = static::findPackageKey($package->getName());
+    $message = sprintf("    Processing <comment>%s</comment>", $package->getPrettyName());
+    if ($io->isVeryVerbose()) {
+      $io->write($message);
+    }
+    if ($package_key) {
+      foreach (static::$packageToCleanup[$package_key] as $path) {
+        $dir_to_remove = $vendor_dir . '/' . $package_key . '/' . $path;
+        $print_message = $io->isVeryVerbose();
+        if (is_dir($dir_to_remove)) {
+          if (static::deleteRecursive($dir_to_remove)) {
+            $message = sprintf("      <info>Removing directory '%s'</info>", $path);
+          }
+          else {
+            // Always display a message if this fails as it means something has
+            // gone wrong. Therefore the message has to include the package name
+            // as the first informational message might not exist.
+            $print_message = TRUE;
+            $message = sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $path, $package->getPrettyName());
+          }
+        }
+        else {
+          // If the package has changed or the --prefer-dist version does not
+          // include the directory this is not an error.
+          $message = sprintf("      Directory '%s' does not exist", $path);
+        }
+        if ($print_message) {
+          $io->write($message);
+        }
+      }
+
+      if ($io->isVeryVerbose()) {
+        // Add a new line to separate this output from the next package.
+        $io->write("");
+      }
+    }
+  }
+
+  /**
    * Find the array key for a given package name with a case-insensitive search.
    *
    * @param string $package_name
@@ -151,6 +274,13 @@ class Composer {
   }
 
   /**
+   * Removes Composer's timeout so that scripts can run indefinitely.
+   */
+  public static function removeTimeout() {
+    ProcessExecutor::setTimeout(0);
+  }
+
+  /**
    * Helper method to remove directories and the files they contain.
    *
    * @param string $path
@@ -176,4 +306,5 @@ class Composer {
 
     return rmdir($path) && $success;
   }
+
 }
