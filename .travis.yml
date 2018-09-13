@@ -25,18 +25,23 @@ before_script:
   - composer show --name-only
   - cd ../drupal-project-legacy
   - composer show --name-only
+  - cd ..
   # Remove files that we know will be different.
   # TODO: Change these as we go along.
-  - cd ..
+  # drupal-project-legacy will not be a git repo.
   - rm -rf drupal-git-clone/.git
-  - rm -rf drupal-*/composer.????
+  # Remove files unique to drupal-legacy-project
   - rm -rf drupal-project-legacy/.travis.yml
   - rm -rf drupal-project-legacy/LICENSE
   - rm -rf drupal-project-legacy/packages.json
   - rm -rf drupal-project-legacy/README.md
-  - rm -rf drupal-project-legacy/vendor/drupal/core
-  - rm -rf drupal-project-legacy/vendor/drupal/drupal-core-strict
-  - rm -rf drupal-project-legacy/vendor/drupal/drupal-scaffold
+  # Autoloading and composer vendor dirs will differ because of file paths.
+  - rm -rf drupal-git-clone/vendor/autoload.php
+  - rm -rf drupal-project-legacy/vendor/autoload.php
+  - rm -rf drupal-project-legacy/vendor/composer
+  - rm -rf drupal-git-clone/vendor/composer
+  # Clone will not contain any drupal/* dependencies.
+  - rm -rf drupal-project-legacy/vendor/drupal/
 
 script:
   - diff -rq drupal-git-clone drupal-project-legacy
