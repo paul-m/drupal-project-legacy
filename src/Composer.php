@@ -128,7 +128,7 @@ class Composer {
    *   A PackageEvent object to get the configured composer vendor directories
    *   from.
    */
-  public static function vendorTestCodeCleanup(PackageEvent $event) {
+  private static function vendorTestCodeCleanup(PackageEvent $event) {
     $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
     $io = $event->getIO();
     $op = $event->getOperation();
