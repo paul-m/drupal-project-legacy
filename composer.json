@@ -1,7 +1,7 @@
 {
     "_readme": {
         "note": "THIS IS A DEVELOPMENT VERSION OF THIS PROJECT.",
-        "TODO": "Remove the autoload section. Refactor the composer scripts away.",
+        "TODO": "Remove the autoload section. Refactor the composer scripts away."
     },
     "name": "drupal/drupal-project-legacy",
     "description": "Project template for Drupal 8",
