@@ -31,9 +31,6 @@ before_script:
   # TODO: Change these as we go along.
   # drupal-project-legacy will not be a git repo.
   - rm -rf drupal-git-clone/.git
-  # drupal-project-legacy does not yet add .htaccess or web.config files.
-  - rm -rf drupal-git-clone/.htaccess
-  - rm -rf drupal-git-clone/web.config
   # Remove files unique to drupal-legacy-project
   - rm -rf drupal-project-legacy/.travis.yml
   - rm -rf drupal-project-legacy/LICENSE
