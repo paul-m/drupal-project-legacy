@@ -3,21 +3,20 @@
 namespace DrupalLegacyProject;
 
 use Composer\Script\Event;
+use Drupal\Core\Composer\Composer as DrupalComposer;
 
 class Composer {
 
   public static function projectFinished(Event $e) {
-    error_log(get_class($e));
-    $root_package = $e->getComposer()->getPackage();
-    $vendor_path = substr(
-      $e->getComposer()->getInstallationManager()->getInstallPath($root_package),
-      0,
-      0 - strlen($root_package->getName())
-    );
-    error_log($vendor_path);
+    $locker_data = $e->getComposer()->getLocker();
+    $packages = $locker_data['packages'];
+    foreach ($packages as $package) {
+      $name = $package['name'];
+      error_log('removing: ' . $name);
 
-    $locker = $e->getComposer()->getLocker();
-    error_log(print_r($locker->getLockData(), true));
+
+    }
+
 
 //    \error_log($e->getName());
 //    \error_log(print_r($e->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages(),true));
