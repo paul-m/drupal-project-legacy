@@ -22,9 +22,9 @@ before_script:
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
   # Make lists of composer packages installed, remove vendor dirs.
   - cd drupal-git-clone
-  - composer show --name-only | sort > ../clone_composer_installed.txt
+  - composer show --name-only
   - cd ../drupal-project-legacy
-  - composer show --name-only | sort > ../project_composer_installed.txt
+  - composer show --name-only
   # Remove files that we know will be different.
   # TODO: Change these as we go along.
   - cd ..
@@ -45,5 +45,5 @@ before_script:
   - sed -i '/drupal\/drupal-scaffold/d' ./drupal-project-legacy/composer_installed.txt
 
 script:
-  - diff -r drupal-git-clone drupal-project-legacy
+  - diff -rq drupal-git-clone drupal-project-legacy
   - diff -r clone_composer_installed.txt project_composer_installed.txt
