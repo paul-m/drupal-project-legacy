@@ -8,8 +8,8 @@ use Drupal\Core\Composer\Composer as DrupalComposer;
 class Composer {
 
   public static function projectFinished(Event $e) {
-    $locker_data = $e->getComposer()->getLocker();
-    $packages = $locker_data['packages'];
+    $locker = $e->getComposer()->getLocker();
+    $packages = $locker->getLockData()['packages'];
     foreach ($packages as $package) {
       $name = $package['name'];
       error_log('removing: ' . $name);
