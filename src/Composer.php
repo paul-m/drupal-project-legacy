@@ -9,8 +9,16 @@ class Composer {
   public static function projectFinished(Event $e) {
     error_log(get_class($e));
     $root_package = $e->getComposer()->getPackage();
-    $path = $e->getComposer()->getInstallationManager()->getInstallPath($root_package);
-    error_log($path);
+    $vendor_path = substr(
+      $e->getComposer()->getInstallationManager()->getInstallPath($root_package),
+      0,
+      0 - strlen($root_package->getName())
+    );
+    error_log($vendor_path);
+
+    $locker = $e->getComposer()->getLocker();
+    error_log(print_r($locker->getLockData(), true));
+
 //    \error_log($e->getName());
 //    \error_log(print_r($e->getComposer()->getRepositoryManager()->getLocalRepository()->getPackages(),true));
     /*
