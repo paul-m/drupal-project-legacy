@@ -15,7 +15,7 @@ before_script:
   - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$TRAVIS_BRANCH"'@' tests/packages.json
   - cat tests/packages.json
   # Modifying composer.json for our core version.
-  - composer=jq -M '. .require."drupal/core" = "'$DRUPAL_CORE_VERSION'" |.require."drupal/drupal-core-strict" = "'DRUPAL_CORE_VERSION'"' composer.json
+  - composer=`jq -M '. .require."drupal/core" = "'$DRUPAL_CORE_VERSION'" |.require."drupal/drupal-core-strict" = "'$DRUPAL_CORE_VERSION'"' composer.json`
   - echo "$composer" > composer.json
   - cat composer.json
   # Set up Composer.
