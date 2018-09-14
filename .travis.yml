@@ -10,9 +10,15 @@ before_script:
   # Generate a packages.json file so we can test locally. We add the build dir
   # for our local package, and we add the current branch so this build file is
   # portable.
+  # "drupal\/core": "(8.6.0)"
+  - sed -i -e 's@DRUPAL_CORE_VERSION@'"$DRUPAL_CORE_VERSION"'@' tests/packages.json
   - sed -i -e 's@TRAVIS_BUILD_DIR@'"$TRAVIS_BUILD_DIR"'@' tests/packages.json
   - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$TRAVIS_BRANCH"'@' tests/packages.json
   - cat tests/packages.json
+  # The literal style.
+  - |-
+    sed -i -e 's@"drupal\/core": "(8.6.0)"@'"$DRUPAL_CORE_VERSION"'@' tests/packages.json
+  - cat composer.json
   # Set up Composer.
   - composer selfupdate --no-interaction
   - composer clearcache
