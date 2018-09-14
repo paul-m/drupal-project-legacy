@@ -18,6 +18,8 @@ before_script:
   - composer=`jq -M '. .require."drupal/core" = "'$DRUPAL_CORE_VERSION'" |.require."drupal/drupal-core-strict" = "'$DRUPAL_CORE_VERSION'"' composer.json`
   - echo "$composer" > composer.json
   - cat composer.json
+  - git add composer.json
+  - git commit -m 'modified composer.json'
   # Set up Composer.
   - composer selfupdate --no-interaction
   - composer clearcache
