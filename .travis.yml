@@ -16,7 +16,7 @@ before_script:
   - cat tests/packages.json
   # Modifying composer.json for our core version.
   - tmp=$(mktemp)
-  - jq '.require."drupal/core" = "''$DRUPAL_CORE_VERSION'"' composer.json > "$tmp"
+  - jq '.require."drupal/core" = "'$DRUPAL_CORE_VERSION'"' composer.json > "$tmp"
   - mv "$tmp" composer.json
   - cat composer.json
   # Set up Composer.
