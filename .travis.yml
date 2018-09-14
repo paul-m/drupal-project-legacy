@@ -6,7 +6,7 @@ php:
 
 before_script:
   # Set up some variables.
-  - DRUPAL_CORE_VERSION=8.6.0
+  - DRUPAL_CORE_VERSION=8.6.1
   # Generate a packages.json file so we can test locally. We add the build dir
   # for our local package, and we add the current branch so this build file is
   # portable.
