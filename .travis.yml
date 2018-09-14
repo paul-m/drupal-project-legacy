@@ -7,34 +7,33 @@ php:
 before_script:
   # Set up some variables.
   - DRUPAL_CORE_VERSION=8.6.0
-  - DRUPAL_PROJECT_LEGACY_BRANCH=`git rev-parse --abbrev-ref HEAD`
   # Generate a packages.json file so we can test locally. We add the build dir
   # for our local package, and we add the current branch so this build file is
   # portable.
-  - sed -i -e 's@TRAVIS_BUILD_DIR@'"$TRAVIS_BUILD_DIR"'@' packages.json
-  - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$DRUPAL_PROJECT_LEGACY_BRANCH"'@' packages.json
-  - cat packages.json
+  - sed -i -e 's@TRAVIS_BUILD_DIR@'"$TRAVIS_BUILD_DIR"'@' tests/packages.json
+  - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$TRAVIS_BRANCH"'@' tests/packages.json
+  - cat tests/packages.json
   # Set up Composer.
   - composer selfupdate --no-interaction
   - composer clearcache
   # Build our parallel codebases.
-  - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
+  - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/tests/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
   - git clone https://git.drupal.org/project/drupal.git -b $DRUPAL_CORE_VERSION drupal-git-clone
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
   # Make lists of composer packages installed.
-  - cd drupal-git-clone
-  - composer show --name-only
-  - cd ../drupal-project-legacy
-  - composer show --name-only
-  - cd ..
+  - composer show --name-only --working-dir drupal-project-legacy
+  - composer show --name-only --working-dir drupal-git-clone
   # Remove files that we know will be different.
   # TODO: Change these as we go along.
   # drupal-project-legacy will not be a git repo.
   - rm -rf drupal-git-clone/.git
+  # drupal-project-legacy does not yet add .htaccess or web.config files.
+  - rm -rf drupal-git-clone/.htaccess
+  - rm -rf drupal-git-clone/web.config
   # Remove files unique to drupal-legacy-project
   - rm -rf drupal-project-legacy/.travis.yml
   - rm -rf drupal-project-legacy/LICENSE
-  - rm -rf drupal-project-legacy/packages.json
+  - rm -rf drupal-project-legacy/tests
   - rm -rf drupal-project-legacy/README.md
   - rm -rf drupal-project-legacy/src
   # Different projects have different composer.json and thus lock files.
