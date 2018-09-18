@@ -20,6 +20,7 @@ before_script:
   - cat composer.json
   - git add composer.json
   - git commit -m 'modified composer.json'
+  - git status
   # Set up Composer.
   - composer selfupdate --no-interaction
   - composer clearcache

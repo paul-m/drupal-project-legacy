@@ -11,9 +11,9 @@
     ],
     "require": {
         "composer/installers": "^1.2",
-        "webflo/drupal-scaffold": "8.6.x-dev",
+        "drupal/drupal-scaffold": "8.6.x-dev",
         "webflo/drupal-core-strict": "8.6.x-dev",
-        "drupal/core": "8.6.0"
+        "drupal/core": "8.6.1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
