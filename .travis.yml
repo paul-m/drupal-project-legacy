@@ -12,7 +12,7 @@ before_script:
   # portable.
   - sed -i -e 's@DRUPAL_CORE_VERSION@'"$DRUPAL_CORE_VERSION"'@' tests/packages.json
   - sed -i -e 's@TRAVIS_BUILD_DIR@'"$TRAVIS_BUILD_DIR"'@' tests/packages.json
-  - sed -i -e 's@DRUPAL_PROJECT_LEGACY_BRANCH@'"$TRAVIS_BRANCH"'@' tests/packages.json
+  - sed -i -e 's@TRAVIS_BRANCH@'"$TRAVIS_BRANCH"'@' tests/packages.json
   - cat tests/packages.json
   # Modifying composer.json for our core version.
   - composer=`jq -M '. .require."drupal/core" = "'$DRUPAL_CORE_VERSION'" |.require."webflo/drupal-core-strict" = "'$DRUPAL_CORE_VERSION'"' composer.json`
@@ -24,7 +24,8 @@ before_script:
   - composer selfupdate --no-interaction
   - composer clearcache
   # Build our parallel codebases.
-  - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/tests/packages.json drupal/drupal-project-legacy drupal-project-legacy $DRUPAL_CORE_VERSION
+  # Since we use --repository-url Composer should use our packages.json file.
+  - composer create-project -v --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/tests/packages.json drupal/drupal-project-legacy drupal-project-legacy $DRUPAL_CORE_VERSION
   - git clone https://git.drupal.org/project/drupal.git -b $DRUPAL_CORE_VERSION drupal-git-clone
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
   # Make lists of composer packages installed.
