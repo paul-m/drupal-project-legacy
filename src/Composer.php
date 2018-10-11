@@ -202,32 +202,26 @@ EOT;
     foreach (static::$packageToCleanup as $package_path => $cleanup_paths) {
       $package_dir = $vendor_dir . '/' . $package_path;
       if (is_dir($package_dir)) {
-        if (true) {//$io->isVeryVerbose()) {
-          $io->write(sprintf("    Processing <comment>%s</comment>", $package_path));
-        }
+        $io->write(sprintf("    Processing <comment>%s</comment>", $package_path), TRUE, $io::VERY_VERBOSE);
         foreach ($cleanup_paths as $cleanup_path) {
           $cleanup_dir = $package_dir . '/' . $cleanup_path;
           if (is_dir($cleanup_dir)) {
             // Try to clean up.
             if (static::deleteRecursive($cleanup_dir)) {
-              if (TRUE) { //$io->isVeryVerbose()) {
-                $io->write(sprintf("      <info>Removing directory '%s'</info>", $cleanup_path));
-              }
+              $io->write(sprintf("      <info>Removing directory '%s'</info>", $cleanup_path), TRUE, $io::VERY_VERBOSE);
             }
             else {
               // Always display a message if this fails as it means something
               // has gone wrong. Therefore the message has to include the
               // package name as the first informational message might not
               // exist.
-              $io->write(sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $cleanup_path, $package_path));
+              $io->write(sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $cleanup_path, $package_path), TRUE, IOInterface::NORMAL);
             }
           }
           else {
             // If the package has changed or the --prefer-dist version does not
             // include the directory this is not an error.
-            if (TRUE) {//$io->isVeryVerbose()) {
-              $io->write(sprintf("      Directory '%s' does not exist", $cleanup_dir));
-            }
+            $io->write(sprintf("      Directory '%s' does not exist", $cleanup_dir), TRUE, $io::VERY_VERBOSE);
           }
         }
       }

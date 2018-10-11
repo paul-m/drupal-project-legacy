@@ -21,17 +21,12 @@ before_script:
   - composer create-project -vv --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
   - git clone https://git.drupal.org/project/drupal.git -b $DRUPAL_CORE_VERSION drupal-git-clone
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
-  # Make lists of composer packages installed.
-  - cd drupal-git-clone
-  - composer show --name-only
-  - cd ../drupal-project-legacy
-  - composer show --name-only
-  - cd ..
   # Remove files that we know will be different.
   # TODO: Change these as we go along.
   # drupal-project-legacy will not be a git repo.
   - rm -rf drupal-git-clone/.git
   # Remove files unique to drupal-legacy-project
+  - rm -rf drupal-project-legacy/.gitignore
   - rm -rf drupal-project-legacy/.travis.yml
   - rm -rf drupal-project-legacy/LICENSE
   - rm -rf drupal-project-legacy/packages.json
