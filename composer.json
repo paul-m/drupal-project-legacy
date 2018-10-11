@@ -28,8 +28,8 @@
     },
     "scripts": {
         "post-autoload-dump": "DrupalLegacyProject\\Composer::ensureHtaccess",
-        "post-install-cmd": "DrupalLegacyProject\\Composer::vendorTestCodeCleanup",
-        "post-update-cmd": "DrupalLegacyProject\\Composer::vendorTestCodeCleanup",
-        "post-create-project-cmd": "DrupalLegacyProject\\Composer::vendorTestCodeCleanup"
+        "post-package-install": "DrupalLegacyProject\\Composer::vendorTestCodeCleanup",
+        "post-package-update": "DrupalLegacyProject\\Composer::vendorTestCodeCleanup",
+        "post-create-project-cmd": "DrupalLegacyProject\\Composer::vendorTestCodeCleanupCommand"
     }
 }

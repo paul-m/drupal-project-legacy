@@ -4,8 +4,10 @@ namespace DrupalLegacyProject;
 
 use DrupalLegacyProject\FileStorage;
 use Composer\Script\Event;
+use Composer\Installer\PackageEvent;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Util\ProcessExecutor;
+use Composer\IO\IOInterface;
 
 /**
  * Provides static functions for composer script events.
@@ -189,40 +191,82 @@ EOT;
   }
 
   /**
-   * Remove possibly problematic test files from vendored projects.
+   * Remove possibly problematic test files from a single vendor package.
    *
    * @param \Composer\Script\Event $event
-   *   A PackageEvent object to get the configured composer vendor directories
+   *   A Composer Event object to get the configured composer vendor directories
    *   from.
    */
-  public static function vendorTestCodeCleanup(Event $event) {
-    $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
-    $io = $event->getIO();
+  public static function vendorTestCodeCleanup(PackageEvent $event) {
+    $operation = $event->getOperation();
+    // Get target package if we're updating, package otherwise.
+    if ($operation->getJobType() == 'update') {
+      $package = $operation->getTargetPackage();
+    }
+    else {
+      $package = $operation->getPackage();
+    }
+    if ($package_key = static::findPackageKey($package->getName())) {
+      return static::doTestCodeCleanup(
+        $event->getComposer()->getConfig()->get('vendor-dir'),
+        $package_key,
+        static::$packageToCleanup[$package_key],
+        $event->getIO()
+      );
+    }
+  }
 
+  /**
+   * Remove possibly problematic test files from vendor packages.
+   *
+   * This method cleans all the available packages at the same time.
+   *
+   * @param \Composer\Script\Event $event
+   *   The Composer Event object.
+   */
+  public static function vendorTestCodeCleanupCommand(Event $event) {
+    $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
     foreach (static::$packageToCleanup as $package_path => $cleanup_paths) {
-      $package_dir = $vendor_dir . '/' . $package_path;
-      if (is_dir($package_dir)) {
-        $io->write(sprintf("    Test code cleanup for <comment>%s</comment>", $package_path), TRUE, $io::VERY_VERBOSE);
-        foreach ($cleanup_paths as $cleanup_path) {
-          $cleanup_dir = $package_dir . '/' . $cleanup_path;
-          if (is_dir($cleanup_dir)) {
-            // Try to clean up.
-            if (static::deleteRecursive($cleanup_dir)) {
-              $io->write(sprintf("      <info>Removing directory '%s'</info>", $cleanup_path), TRUE, $io::VERY_VERBOSE);
-            }
-            else {
-              // Always display a message if this fails as it means something
-              // has gone wrong. Therefore the message has to include the
-              // package name as the first informational message might not
-              // exist.
-              $io->write(sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $cleanup_path, $package_path), TRUE, IOInterface::NORMAL);
-            }
+      static::doTestCodeCleanup($vendor_dir, $package_path, $cleanup_paths, $event->getIO());
+    }
+  }
+
+  /**
+   * Remove possibly problematic test files from a single vendor package.
+   *
+   * @param string $vendor_dir
+   *   Full path to the vendor directory.
+   * @param string $package_path
+   *   The package path within the vendor directory. Example: psr/log
+   * @param string[] $cleanup_paths
+   *   An array of relative paths within the vendor path which should be
+   *   removed.
+   * @param \Composer\IO\IOInterface $io
+   *   IO object provided by Composer.
+   */
+  protected static function doTestCodeCleanup($vendor_dir, $package_path, $cleanup_paths, IOInterface $io) {
+    $package_dir = $vendor_dir . '/' . $package_path;
+    if (is_dir($package_dir)) {
+      $io->write(sprintf("    Test code cleanup for <comment>%s</comment>", $package_path), TRUE, $io::VERY_VERBOSE);
+      foreach ($cleanup_paths as $cleanup_path) {
+        $cleanup_dir = $package_dir . '/' . $cleanup_path;
+        if (is_dir($cleanup_dir)) {
+          // Try to clean up.
+          if (static::deleteRecursive($cleanup_dir)) {
+            $io->write(sprintf("      <info>Removing directory '%s'</info>", $cleanup_path), TRUE, $io::VERY_VERBOSE);
           }
           else {
-            // If the package has changed or the --prefer-dist version does not
-            // include the directory this is not an error.
-            $io->write(sprintf("      Directory '%s' does not exist", $cleanup_dir), TRUE, $io::VERY_VERBOSE);
+            // Always display a message if this fails as it means something
+            // has gone wrong. Therefore the message has to include the
+            // package name as the first informational message might not
+            // exist.
+            $io->write(sprintf("      <error>Failure removing directory '%s'</error> in package <comment>%s</comment>.", $cleanup_path, $package_path), TRUE, IOInterface::NORMAL);
           }
+        }
+        else {
+          // If the package has changed or the --prefer-dist version does not
+          // include the directory this is not an error.
+          $io->write(sprintf("      Directory '%s' does not exist", $cleanup_dir), TRUE, $io::VERY_VERBOSE);
         }
       }
     }
