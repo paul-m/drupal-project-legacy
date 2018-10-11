@@ -202,7 +202,7 @@ EOT;
     foreach (static::$packageToCleanup as $package_path => $cleanup_paths) {
       $package_dir = $vendor_dir . '/' . $package_path;
       if (is_dir($package_dir)) {
-        $io->write(sprintf("    Processing <comment>%s</comment>", $package_path), TRUE, $io::VERY_VERBOSE);
+        $io->write(sprintf("    Test code cleanup for <comment>%s</comment>", $package_path), TRUE, $io::VERY_VERBOSE);
         foreach ($cleanup_paths as $cleanup_path) {
           $cleanup_dir = $package_dir . '/' . $cleanup_path;
           if (is_dir($cleanup_dir)) {
