@@ -18,7 +18,7 @@ before_script:
   - composer selfupdate --no-interaction
   - composer clearcache
   # Build our parallel codebases.
-  - composer create-project --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
+  - composer create-project -vv --no-dev --no-progress --repository-url="$TRAVIS_BUILD_DIR"/packages.json drupal/drupal-project-legacy drupal-project-legacy 8.6.*
   - git clone https://git.drupal.org/project/drupal.git -b $DRUPAL_CORE_VERSION drupal-git-clone
   - composer install --no-dev --no-progress --working-dir drupal-git-clone
   # Make lists of composer packages installed.
