@@ -198,7 +198,6 @@ EOT;
   public static function vendorTestCodeCleanup(Event $event) {
     $vendor_dir = $event->getComposer()->getConfig()->get('vendor-dir');
     $io = $event->getIO();
-    $op = $event->getOperation();
 
     foreach (static::$packageToCleanup as $package_path => $cleanup_paths) {
       $package_dir = $vendor_dir . PATH_SEPARATOR . $package_path;
