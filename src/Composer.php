@@ -200,17 +200,17 @@ EOT;
     $io = $event->getIO();
 
     foreach (static::$packageToCleanup as $package_path => $cleanup_paths) {
-      $package_dir = $vendor_dir . PATH_SEPARATOR . $package_path;
+      $package_dir = $vendor_dir . '/' . $package_path;
       if (is_dir($package_dir)) {
-        if ($io->isVeryVerbose()) {
+        if (true) {//$io->isVeryVerbose()) {
           $io->write(sprintf("    Processing <comment>%s</comment>", $package_path));
         }
         foreach ($cleanup_paths as $cleanup_path) {
-          $cleanup_dir = $package_dir . PATH_SEPARATOR . $cleanup_path;
+          $cleanup_dir = $package_dir . '/' . $cleanup_path;
           if (is_dir($cleanup_dir)) {
             // Try to clean up.
             if (static::deleteRecursive($cleanup_dir)) {
-              if ($io->isVeryVerbose()) {
+              if (TRUE) { //$io->isVeryVerbose()) {
                 $io->write(sprintf("      <info>Removing directory '%s'</info>", $cleanup_path));
               }
             }
@@ -225,8 +225,8 @@ EOT;
           else {
             // If the package has changed or the --prefer-dist version does not
             // include the directory this is not an error.
-            if ($io->isVeryVerbose()) {
-              $io->write(sprintf("      Directory '%s' does not exist", $cleanup_path));
+            if (TRUE) {//$io->isVeryVerbose()) {
+              $io->write(sprintf("      Directory '%s' does not exist", $cleanup_dir));
             }
           }
         }
